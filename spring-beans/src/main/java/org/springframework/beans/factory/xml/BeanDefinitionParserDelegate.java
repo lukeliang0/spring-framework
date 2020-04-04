@@ -89,6 +89,8 @@ public class BeanDefinitionParserDelegate {
 	public static final String MULTI_VALUE_ATTRIBUTE_DELIMITERS = ",; ";
 
 	/**
+	 * fixme 3.1.1.2 important property xml的属性表
+	 *
 	 * Value of a T/F attribute that represents true.
 	 * Anything else represents false. Case seNsItive.
 	 */
@@ -412,6 +414,7 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, @Nullable BeanDefinition containingBean) {
+
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
@@ -434,8 +437,12 @@ public class BeanDefinitionParserDelegate {
 			checkNameUniqueness(beanName, aliases, ele);
 		}
 
+		// fixme entry node ele -> beanDefinition的转换 important
+		// fixme unit 3.1.1.1
 		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
 		if (beanDefinition != null) {
+			// fixme 名字的逻辑，没有解析出来的话执行
+			// fixme unit 3.1.1.8
 			if (!StringUtils.hasText(beanName)) {
 				try {
 					if (containingBean != null) {
@@ -500,6 +507,7 @@ public class BeanDefinitionParserDelegate {
 	public AbstractBeanDefinition parseBeanDefinitionElement(
 			Element ele, String beanName, @Nullable BeanDefinition containingBean) {
 
+		// fixme unit 3.1.1.4 链表（栈） BeanEntry 维护了名字
 		this.parseState.push(new BeanEntry(beanName));
 
 		String className = null;
@@ -512,8 +520,14 @@ public class BeanDefinitionParserDelegate {
 		}
 
 		try {
+			// fixme important property AbstractBeanDefinition属性设置
+			// fixme 标记 rootBd没有parent属性，这里使用了generel
+			// fixme root 和 gene同继承自 abstract
+			// fixme unit 3.1.1.5
 			AbstractBeanDefinition bd = createBeanDefinition(className, parent);
 
+			// fixme unit 3.1.1.6
+			// fixme important bd 字段填充
 			parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
 			bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
 
@@ -1388,6 +1402,7 @@ public class BeanDefinitionParserDelegate {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
+		// fixme unit 3.1.1.13 扩展支持
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 

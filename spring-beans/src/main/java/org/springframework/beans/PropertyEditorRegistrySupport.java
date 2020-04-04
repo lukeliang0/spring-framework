@@ -89,6 +89,7 @@ import org.springframework.util.ClassUtils;
  * @see java.beans.PropertyEditorSupport#setAsText
  * @see java.beans.PropertyEditorSupport#setValue
  */
+// fixme beanWrapperImpl的常见类型，通过这里，天生支持了多种属性类型的注入
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
 	@Nullable

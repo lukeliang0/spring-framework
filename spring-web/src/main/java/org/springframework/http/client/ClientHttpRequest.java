@@ -37,7 +37,7 @@ public interface ClientHttpRequest extends HttpRequest, HttpOutputMessage {
 
 	/**
 	 * Execute this request, resulting in a {@link ClientHttpResponse} that can be read.
-	 * @return the response result of the execution
+	 * @return the response result of them execution
 	 * @throws IOException in case of I/O errors
 	 */
 	ClientHttpResponse execute() throws IOException;

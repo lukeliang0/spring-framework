@@ -36,6 +36,8 @@ import org.springframework.lang.Nullable;
  * @see NamespaceHandler
  * @see AbstractBeanDefinitionParser
  */
+/** fixme unit 3.1.1.11
+ *  fixme important 扩展点实现  */
 public interface BeanDefinitionParser {
 
 	/**

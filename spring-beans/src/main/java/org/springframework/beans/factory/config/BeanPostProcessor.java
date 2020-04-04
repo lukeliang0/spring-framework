@@ -57,6 +57,7 @@ public interface BeanPostProcessor {
 	 */
 	@Nullable
 	default Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		// fixme 扩展点实现 属性注入后，init-method前
 		return bean;
 	}
 
@@ -83,6 +84,7 @@ public interface BeanPostProcessor {
 	 */
 	@Nullable
 	default Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		// fixme 扩展点实现 init-method后
 		return bean;
 	}
 

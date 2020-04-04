@@ -239,9 +239,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredType,
 			@Nullable final Object[] args, boolean typeCheckOnly) throws BeansException {
 
+		// fixme unit 4.0.0.1
+		// fixme entry
+		// FIXME bean name 提取 去除修饰符（如工厂bean的 &） 和转换alias
 		final String beanName = transformedBeanName(name);
 		Object bean;
 
+		// fixme unit 4.0.0.2
+		// FIXME 检查缓存中或实例工厂是否有对应实例，避免循环依赖，缓存中的是最原始的bean状态，例如工厂bean本身
+		// FIXME 而不是factory-method的返回对象 getObjectForBeanInstance 最终完成工作
+		// FIXME ObjectFactory的提前曝光和依赖者直接使用
 		// Eagerly check singleton cache for manually registered singletons.
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
@@ -254,16 +261,20 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.debug("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
+			// TODO 这块说明不清楚
+			// FIXME 返回实例，有时存在Beanfactory(是不是工厂Bean，写错？），不返回实例而是返回制定方法返回的实例
 			bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		}
 
 		else {
+			// FIXME 只有单例才解决循环依赖
 			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
 			if (isPrototypeCurrentlyInCreation(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
 
+			// FIXME 如果不存在bean则递归到父工厂创建
 			// Check if bean definition exists in this factory.
 			BeanFactory parentBeanFactory = getParentBeanFactory();
 			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
@@ -288,18 +299,24 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			try {
+				// FIXME 合并父类属性并转换BeanDefinition
 				final RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 				checkMergedBeanDefinition(mbd, beanName, args);
 
+				//FIXME 创建该bean的依赖
 				// Guarantee initialization of beans that the current bean depends on.
 				String[] dependsOn = mbd.getDependsOn();
 				if (dependsOn != null) {
 					for (String dep : dependsOn) {
+						// TODO 这段是新的
 						if (isDependent(beanName, dep)) {
 							throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 									"Circular depends-on relationship between '" + beanName + "' and '" + dep + "'");
 						}
+
+						// FIXME 缓存依赖调用 这块和下面的get bean和书上顺序不同
 						registerDependentBean(dep, beanName);
+						// TODO ends
 						try {
 							getBean(dep);
 						}
@@ -310,8 +327,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					}
 				}
 
+				// FIXME  创建bean，single和proto
+				// FIXME  !!!重点 important
 				// Create bean instance.
 				if (mbd.isSingleton()) {
+					// FIXME getSingleton 来自 DefaultSingletonBeanRegistry
+					// FIXME 重载的getSingleton
+					// FIXME 真正的获取不在此处实现 来自ObjectFactory实例的.singletonFactory(),即该匿名内部类
+					// FIXME 调用了抽象方法createBean 即子类（此处为 AbstractAutowireCapableBeanFactory）的 createBean
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
 							return createBean(beanName, mbd, args);
@@ -356,6 +379,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 								afterPrototypeCreation(beanName);
 							}
 						});
+						// TODO 其余的scope也有prototype的before和after
 						bean = getObjectForBeanInstance(scopedInstance, name, beanName, mbd);
 					}
 					catch (IllegalStateException ex) {
@@ -372,6 +396,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 		}
 
+		//FIXME 类型检查
 		// Check if required type matches the type of the actual bean instance.
 		if (requiredType != null && !requiredType.isInstance(bean)) {
 			try {
@@ -745,6 +770,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	@Override
 	public void setBeanExpressionResolver(@Nullable BeanExpressionResolver resolver) {
+		// fixme SPEL支持 扩展点支持
 		this.beanExpressionResolver = resolver;
 	}
 
@@ -767,6 +793,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	@Override
 	public void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar) {
+		//fixme 将属性编辑器添加入propertyEditorRegistrars
+
 		Assert.notNull(registrar, "PropertyEditorRegistrar must not be null");
 		this.propertyEditorRegistrars.add(registrar);
 	}
@@ -1153,6 +1181,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected void initBeanWrapper(BeanWrapper bw) {
 		bw.setConversionService(getConversionService());
+		// fixme 注册属性编辑器 bw => BeanWrapperImpl => PropertyEditorRegistrySupport implements PropertyEditorRegistry
 		registerCustomEditors(bw);
 	}
 
@@ -1447,6 +1476,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	@Nullable
 	protected Object evaluateBeanDefinitionString(@Nullable String value, @Nullable BeanDefinition beanDefinition) {
+		// fixme 扩展点支持  beanExpressionResolve在ApplicationContext中设置spel解析器
+		// fixme 当获取到SPEL时，在下面的代码中解析value
 		if (this.beanExpressionResolver == null) {
 			return value;
 		}
@@ -1458,6 +1489,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				scope = getRegisteredScope(scopeName);
 			}
 		}
+		//fixme spel 解析
 		return this.beanExpressionResolver.evaluate(value, new BeanExpressionContext(this, scope));
 	}
 
@@ -1622,6 +1654,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected Object getObjectForBeanInstance(
 			Object beanInstance, String name, String beanName, @Nullable RootBeanDefinition mbd) {
 
+		// FIXME 适配工厂bean，调用FactoryBean的getObject方法获取实际对象
 		// Don't let calling code try to dereference the factory if the bean isn't a factory.
 		if (BeanFactoryUtils.isFactoryDereference(name)) {
 			if (beanInstance instanceof NullBean) {
@@ -1635,12 +1668,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		// Now we have the bean instance, which may be a normal bean or a FactoryBean.
 		// If it's a FactoryBean, we use it to create a bean instance, unless the
 		// caller actually wants a reference to the factory.
+		// FIXME 如果bean不是工厂或者要的就是工厂bean，直接返回
 		if (!(beanInstance instanceof FactoryBean) || BeanFactoryUtils.isFactoryDereference(name)) {
 			return beanInstance;
 		}
 
 		Object object = null;
 		if (mbd == null) {
+			//FIXME 已加载的类中监测
 			object = getCachedObjectForFactoryBean(beanName);
 		}
 		if (object == null) {
@@ -1648,9 +1683,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
 			// Caches object obtained from FactoryBean if it is a singleton.
 			if (mbd == null && containsBeanDefinition(beanName)) {
+				// FIXME 合并父类参数
 				mbd = getMergedLocalBeanDefinition(beanName);
 			}
+			// FIXME 是否用户自定义而不是应用程序本身定义的（？）
 			boolean synthetic = (mbd != null && mbd.isSynthetic());
+			//FIXME 由getObjectFromFactoryBean实际处理factoryBean生成对象
 			object = getObjectFromFactoryBean(factory, beanName, !synthetic);
 		}
 		return object;

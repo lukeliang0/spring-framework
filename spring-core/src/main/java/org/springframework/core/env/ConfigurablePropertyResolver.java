@@ -100,6 +100,7 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	 * @throws MissingRequiredPropertiesException if any of the required
 	 * properties are not resolvable.
 	 */
+	//fixme 扩展点实现
 	void validateRequiredProperties() throws MissingRequiredPropertiesException;
 
 }

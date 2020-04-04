@@ -56,6 +56,7 @@ public abstract class AopNamespaceUtils {
 	public static void registerAutoProxyCreatorIfNecessary(
 			ParserContext parserContext, Element sourceElement) {
 
+		// fixme nextLineIn
 		BeanDefinition beanDefinition = AopConfigUtils.registerAutoProxyCreatorIfNecessary(
 				parserContext.getRegistry(), parserContext.extractSource(sourceElement));
 		useClassProxyingIfNecessary(parserContext.getRegistry(), sourceElement);
@@ -71,23 +72,38 @@ public abstract class AopNamespaceUtils {
 		registerComponentIfNecessary(beanDefinition, parserContext);
 	}
 
+	/**
+	 * FIXME 注册AnnotationAwareAspectJAutoProxyCreator
+	 *
+	 * @param parserContext
+	 * @param sourceElement
+	 */
 	public static void registerAspectJAnnotationAutoProxyCreatorIfNecessary(
 			ParserContext parserContext, Element sourceElement) {
 
+		// FIXME 注册或升级AutoProxyCreator定义beanname为 org.springframework.aop.config.internalAutoProxyCreator的beanDefinition
 		BeanDefinition beanDefinition = AopConfigUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(
 				parserContext.getRegistry(), parserContext.extractSource(sourceElement));
+		// FIXME 对于proxy-target-class 和 expose-proxy处理
 		useClassProxyingIfNecessary(parserContext.getRegistry(), sourceElement);
+		// FIXME 注册组件并通知，便于监听器做进一步处理
+		// FIXME 其中 beanDefinition的 className 为AnnotationAwareAspectJAutoProxyCreator
 		registerComponentIfNecessary(beanDefinition, parserContext);
 	}
 
 	private static void useClassProxyingIfNecessary(BeanDefinitionRegistry registry, @Nullable Element sourceElement) {
 		if (sourceElement != null) {
+
+			// FIXME 对proxy-target-Class属性的处理
 			boolean proxyTargetClass = Boolean.parseBoolean(sourceElement.getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE));
 			if (proxyTargetClass) {
+				// FIXME highlight
 				AopConfigUtils.forceAutoProxyCreatorToUseClassProxying(registry);
 			}
+			// FIXME expose-proxy 属性的处理
 			boolean exposeProxy = Boolean.parseBoolean(sourceElement.getAttribute(EXPOSE_PROXY_ATTRIBUTE));
 			if (exposeProxy) {
+				// FIXME highlight
 				AopConfigUtils.forceAutoProxyCreatorToExposeProxy(registry);
 			}
 		}

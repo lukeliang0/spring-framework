@@ -35,6 +35,9 @@ import org.springframework.lang.Nullable;
  * @since 2.0.3
  * @see InstantiationAwareBeanPostProcessorAdapter
  */
+/**
+ *  fixme 扩展点实现
+ */
 public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationAwareBeanPostProcessor {
 
 	/**

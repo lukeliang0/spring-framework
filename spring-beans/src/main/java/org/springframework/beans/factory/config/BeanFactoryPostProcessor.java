@@ -43,6 +43,8 @@ import org.springframework.beans.BeansException;
  * @see PropertyResourceConfigurer
  */
 @FunctionalInterface
+// fixme 扩展点实现
+// fixme 典型应用 : PropertyResourceConfigurer
 public interface BeanFactoryPostProcessor {
 
 	/**

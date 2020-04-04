@@ -72,7 +72,8 @@ public abstract class AopConfigUtils {
 	@Nullable
 	public static BeanDefinition registerAutoProxyCreatorIfNecessary(
 			BeanDefinitionRegistry registry, @Nullable Object source) {
-
+		// fixme chain end
+		// fixme 这条线主要注册了 InfrastructureAdvisorAutoProxyCreator
 		return registerOrEscalateApcAsRequired(InfrastructureAdvisorAutoProxyCreator.class, registry, source);
 	}
 
@@ -100,7 +101,12 @@ public abstract class AopConfigUtils {
 		return registerOrEscalateApcAsRequired(AnnotationAwareAspectJAutoProxyCreator.class, registry, source);
 	}
 
+	/**
+	 *  FIXME 强制使用的过程其实也是一个属性设置的过程
+	 * @param registry
+	 */
 	public static void forceAutoProxyCreatorToUseClassProxying(BeanDefinitionRegistry registry) {
+		// fixme 强制使用cglib，配置支持
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			BeanDefinition definition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
 			definition.getPropertyValues().add("proxyTargetClass", Boolean.TRUE);
@@ -108,6 +114,7 @@ public abstract class AopConfigUtils {
 	}
 
 	public static void forceAutoProxyCreatorToExposeProxy(BeanDefinitionRegistry registry) {
+		// fixme 配置支持 支持((type)AopContext.currentProxy()).method()
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			BeanDefinition definition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
 			definition.getPropertyValues().add("exposeProxy", Boolean.TRUE);
@@ -120,15 +127,20 @@ public abstract class AopConfigUtils {
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 
+		//FIXME 如果已经存在自动代理创建器 且 存在的自动代理创建器和现在的不一致，则根据优先级决定使用哪个
 		if (registry.containsBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME)) {
 			BeanDefinition apcDefinition = registry.getBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME);
+			// fixme 不一致
 			if (!cls.getName().equals(apcDefinition.getBeanClassName())) {
 				int currentPriority = findPriorityForClass(apcDefinition.getBeanClassName());
 				int requiredPriority = findPriorityForClass(cls);
 				if (currentPriority < requiredPriority) {
+					// FIXME 改变beanz最重要的时改变bean的className
 					apcDefinition.setBeanClassName(cls.getName());
 				}
 			}
+
+			//fixme 存在且一致，不需要创建
 			return null;
 		}
 

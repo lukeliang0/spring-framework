@@ -52,6 +52,8 @@ public class TxNamespaceHandler extends NamespaceHandlerSupport {
 
 	@Override
 	public void init() {
+		// fixme unit 10.0.0.1
+		// fixme entry tx entry
 		registerBeanDefinitionParser("advice", new TxAdviceBeanDefinitionParser());
 		registerBeanDefinitionParser("annotation-driven", new AnnotationDrivenBeanDefinitionParser());
 		registerBeanDefinitionParser("jta-transaction-manager", new JtaTransactionManagerBeanDefinitionParser());

@@ -82,6 +82,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 		for (String name : advisorNames) {
 			if (isEligibleBean(name)) {
 				if (this.beanFactory.isCurrentlyInCreation(name)) {
+					// fixme 创建中的aop advisor不会被返回
 					if (logger.isDebugEnabled()) {
 						logger.debug("Skipping currently created advisor '" + name + "'");
 					}

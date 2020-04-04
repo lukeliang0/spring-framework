@@ -46,6 +46,7 @@ import org.springframework.lang.Nullable;
  * @see DefaultBeanDefinitionDocumentReader
  * @see NamespaceHandlerResolver
  */
+/** fixme important unit 3.1.1.12 扩展点实现 */
 public interface NamespaceHandler {
 
 	/**

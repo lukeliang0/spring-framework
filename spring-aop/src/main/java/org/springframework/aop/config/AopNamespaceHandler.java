@@ -61,8 +61,12 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 	 */
 	@Override
 	public void init() {
+		// fixme AOP的入口
+
 		// In 2.0 XSD as well as in 2.1 XSD.
 		registerBeanDefinitionParser("config", new ConfigBeanDefinitionParser());
+
+		// fixme 遇到aspectj-autoproxy 注解时会使用这个parser 解析
 		registerBeanDefinitionParser("aspectj-autoproxy", new AspectJAutoProxyBeanDefinitionParser());
 		registerBeanDefinitionDecorator("scoped-proxy", new ScopedProxyBeanDefinitionDecorator());
 

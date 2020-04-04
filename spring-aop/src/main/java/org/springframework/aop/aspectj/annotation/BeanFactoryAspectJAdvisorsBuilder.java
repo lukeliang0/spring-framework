@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  *
  * @author Juergen Hoeller
  * @since 2.0.2
- * @see AnnotationAwareAspectJAutoProxyCreator
+ * @see AnnotationAwareAspectJAuto	ProxyCreator
  */
 public class BeanFactoryAspectJAdvisorsBuilder {
 
@@ -81,6 +81,8 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 	 * @see #isEligibleBean
 	 */
 	public List<Advisor> buildAspectJAdvisors() {
+
+
 		List<String> aspectNames = this.aspectBeanNames;
 
 		if (aspectNames == null) {
@@ -89,6 +91,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 				if (aspectNames == null) {
 					List<Advisor> advisors = new ArrayList<>();
 					aspectNames = new ArrayList<>();
+					// FIXME 获取所有beanName
 					String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 							this.beanFactory, Object.class, true, false);
 					for (String beanName : beanNames) {

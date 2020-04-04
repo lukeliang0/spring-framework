@@ -43,6 +43,7 @@ public interface PropertyEditorRegistrar {
 	 * @param registry the {@code PropertyEditorRegistry} to register the
 	 * custom {@code PropertyEditors} with
 	 */
+	// fixme 扩展点支持 用于属性解析注册
 	void registerCustomEditors(PropertyEditorRegistry registry);
 
 }

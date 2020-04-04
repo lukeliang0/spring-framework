@@ -486,6 +486,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Override
 	public void addBeanFactoryPostProcessor(BeanFactoryPostProcessor postProcessor) {
 		Assert.notNull(postProcessor, "BeanFactoryPostProcessor must not be null");
+		// todo 这里什么时候调用的
 		this.beanFactoryPostProcessors.add(postProcessor);
 	}
 
@@ -517,39 +518,56 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void refresh() throws BeansException, IllegalStateException {
 		synchronized (this.startupShutdownMonitor) {
 			// Prepare this context for refreshing.
+			// FIXME 准备刷新的上下文环境
 			prepareRefresh();
 
+			//FIXME 初始化beanfactory 并读取xml
 			// Tell the subclass to refresh the internal bean factory.
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
+			// FIXME 对bean Factory 进行各种功能填充
+			// FIXME Qualifier和Autowired注解即从此提供支持
 			// Prepare the bean factory for use in this context.
 			prepareBeanFactory(beanFactory);
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
+				// FIXME 子类覆盖方法做额外处理(applicationContext的子类
+				// FIXME 扩展用 扩展点支持
 				postProcessBeanFactory(beanFactory);
 
+				// FIXME 激活各种BeanFactory处理器
+				// fixme 扩展点支持 支持BeanFactoryPostProcessor
 				// Invoke factory processors registered as beans in the context.
 				invokeBeanFactoryPostProcessors(beanFactory);
 
+				// FIXME 注册l拦截bean 创建的bean处理器，这里只是注册，真正调用是在getBean()时
 				// Register bean processors that intercept bean creation.
 				registerBeanPostProcessors(beanFactory);
 
+				//FIXME 处理消息源，国际化处理
 				// Initialize message source for this context.
 				initMessageSource();
 
+				// FIXME 初始化应用消息广播器，并放入ApplicationEventMulticaster bean中
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
 
+				// FIXME 留给子类初始化其他bean
 				// Initialize other special beans in specific context subclasses.
 				onRefresh();
 
+				// FIXME 在注册的bean中查找listener bean ，并注册到消息广播器中
 				// Check for listener beans and register them.
+				// fixme 扩展点支持
 				registerListeners();
 
+				// FIXME 初始化剩下的单例（非惰性）bean
 				// Instantiate all remaining (non-lazy-init) singletons.
 				finishBeanFactoryInitialization(beanFactory);
 
+				// FIXME 完成刷新过程，通知生命周期处理器LifeCycleProcessors刷新过程
+				// FIXME 发出ContextRefreshedEvent
 				// Last step: publish corresponding event.
 				finishRefresh();
 			}
@@ -561,6 +579,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				}
 
 				// Destroy already created singletons to avoid dangling resources.
+				// fixme highlight 销毁创建的bean以避免回收问题
 				destroyBeans();
 
 				// Reset 'active' flag.
@@ -584,6 +603,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void prepareRefresh() {
 		// Switch to active.
+		// FIXME 环境准备
 		this.startupDate = System.currentTimeMillis();
 		this.closed.set(false);
 		this.active.set(true);
@@ -593,10 +613,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize any placeholder property sources in the context environment.
+		// FIXME 留给子类覆盖 扩展点支持
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
+		//FIXME 验证需要的属性文件是否已放入环境中
+		// FIXME 扩展点支持
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...
@@ -620,6 +643,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources
 	 */
 	protected void initPropertySources() {
+		// fixme 扩展点实现
 		// For subclasses: do nothing by default.
 	}
 
@@ -630,11 +654,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #getBeanFactory()
 	 */
 	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+		// FIXME highlight
+		// FIXME 初始化beanfactory，并对xml进行读取，将得到的beanfactory记录在当前实体的属性中
 		refreshBeanFactory();
+
+		// FIXME 返回当前实体的beanFactory属性
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Bean factory for " + getDisplayName() + ": " + beanFactory);
 		}
+
+
 		return beanFactory;
 	}
 
@@ -645,12 +675,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		// Tell the internal bean factory to use the context's class loader etc.
+
 		beanFactory.setBeanClassLoader(getClassLoader());
+		// fixme SPEL支持(spel 只依赖spring-core)
 		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
+		// FIXME 添加默认的PropertyEditorRegistrar,对bean的属性设置支持的一个工具
+		// fixme 扩展点实现，增加属性字符串转其他类型的解析支持
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
+		// FIXME highlight
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
+
+		// FIXME 忽略自动装配的接口
+		// fixme 这些aware在 ac 的aware PostProcessor里已经处理过了
 		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
 		beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
 		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
@@ -660,6 +698,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// BeanFactory interface not registered as resolvable type in a plain factory.
 		// MessageSource registered (and found for autowiring) as a bean.
+		// FIXME 设置几个自动装配的规则
+		// fixme 这些框架依赖都会被注册到 this
 		beanFactory.registerResolvableDependency(BeanFactory.class, beanFactory);
 		beanFactory.registerResolvableDependency(ResourceLoader.class, this);
 		beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
@@ -669,6 +709,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(this));
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found.
+		// FIXME 增加aspectJ支持
 		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
 			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
 			// Set a temporary ClassLoader for type matching.
@@ -676,6 +717,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Register default environment beans.
+		// FIXME 增加默认的系统环境bean
 		if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
 			beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
 		}
@@ -695,6 +737,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @param beanFactory the bean factory used by the application context
 	 */
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		// fixme 扩展点实现
 	}
 
 	/**
@@ -703,6 +746,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Must be called before singleton instantiation.
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
+		//FIXME 激活BeanFactoryPostProcessor
+		// TODO　看来经过包装了
+		// fixme ，下面这行是新加的，逻辑很多到了这里面
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime

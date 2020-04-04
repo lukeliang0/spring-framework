@@ -784,6 +784,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException {
 
+		// fixme unit 3.1.1.10 注册bean，实现自BeanDefinitionRegistry
 		Assert.hasText(beanName, "Bean name must not be empty");
 		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
 
@@ -1032,7 +1033,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			throw new NoUniqueBeanDefinitionException(requiredType, candidates.keySet());
 		}
 
-		return null;
+		return	 null;
 	}
 
 	@Override
@@ -1042,16 +1043,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
 		if (Optional.class == descriptor.getDependencyType()) {
+			// TODO 对1.8 Optional 的支持，和书中不同
 			return createOptionalDependency(descriptor, requestingBeanName);
 		}
+		// TODO 和原书不同，多了对ObjectProvider的处理
 		else if (ObjectFactory.class == descriptor.getDependencyType() ||
 				ObjectProvider.class == descriptor.getDependencyType()) {
+			// FIXME ObjectFactory类注入的特殊处理
 			return new DependencyObjectProvider(descriptor, requestingBeanName);
 		}
 		else if (javaxInjectProviderClass == descriptor.getDependencyType()) {
+			// FIXME javaxInjectProviderClass的特殊处理
 			return new Jsr330ProviderFactory().createDependencyProvider(descriptor, requestingBeanName);
 		}
 		else {
+			// FIXME 通用处理
 			Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(
 					descriptor, requestingBeanName);
 			if (result == null) {
@@ -1065,6 +1071,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public Object doResolveDependency(DependencyDescriptor descriptor, @Nullable String beanName,
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
 
+		// TODO 新增逻辑
 		InjectionPoint previousInjectionPoint = ConstructorResolver.setCurrentInjectionPoint(descriptor);
 		try {
 			Object shortcut = descriptor.resolveShortcut(this);
@@ -1073,11 +1080,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 
 			Class<?> type = descriptor.getDependencyType();
+			//TODO 新增逻辑 结束点
+
+			//FIXME @Value 注解支持
 			Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 			if (value != null) {
 				if (value instanceof String) {
 					String strVal = resolveEmbeddedValue((String) value);
 					BeanDefinition bd = (beanName != null && containsBean(beanName) ? getMergedBeanDefinition(beanName) : null);
+					// fixme AbstractBeanFactory中语言解析配置
 					value = evaluateBeanDefinitionString(strVal, bd);
 				}
 				TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
@@ -1086,6 +1097,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
 			}
 
+			// FIXME 如果解析器没有成功解析，需要考虑各种情况
+			// TODO  数组（或可迭代类型处理，和书中不同
+			// fixme 数组、集合、Map类型的处理，统一被放到了 resolveMultipleBeans方法
 			Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
 			if (multipleBeans != null) {
 				return multipleBeans;
@@ -1119,7 +1133,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			else {
 				// We have exactly one match.
+				// FIXME 已经可以确定只有一个匹配项
 				Map.Entry<String, Object> entry = matchingBeans.entrySet().iterator().next();
+				// TODO 又有多出的逻辑
 				autowiredBeanName = entry.getKey();
 				instanceCandidate = entry.getValue();
 			}
@@ -1151,7 +1167,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private Object resolveMultipleBeans(DependencyDescriptor descriptor, @Nullable String beanName,
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) {
 
+		// fixme 抽象出来的处理可迭代类型的方法
 		Class<?> type = descriptor.getDependencyType();
+		// FIXME 属性是数字类型
 		if (type.isArray()) {
 			Class<?> componentType = type.getComponentType();
 			ResolvableType resolvableType = descriptor.getResolvableType();
@@ -1172,12 +1190,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				autowiredBeanNames.addAll(matchingBeans.keySet());
 			}
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
+			// FIXME 通过转换器将bean的值转换为对应的type类型
 			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
+			// TODO 多出来的排序方法
+			// fixme 是不是对bean 做了排序支持? 以前没有？
+			// fixme 可以看到集合类型也有同样的做法
 			if (getDependencyComparator() != null && result instanceof Object[]) {
 				Arrays.sort((Object[]) result, adaptDependencyComparator(matchingBeans));
 			}
 			return result;
 		}
+		//FIXME 属性是Collectaion类型
 		else if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
 			Class<?> elementType = descriptor.getResolvableType().asCollection().resolveGeneric();
 			if (elementType == null) {
@@ -1193,11 +1216,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			Object result = converter.convertIfNecessary(matchingBeans.values(), type);
+			// TODO 书中未提现，是否当时版本未提供？
+			// fixme 当为list(序列）并且依赖comparable，进行排序
 			if (getDependencyComparator() != null && result instanceof List) {
 				((List<?>) result).sort(adaptDependencyComparator(matchingBeans));
 			}
 			return result;
 		}
+		// FIXME Map 类型
 		else if (Map.class == type) {
 			ResolvableType mapType = descriptor.getResolvableType().asMap();
 			Class<?> keyType = mapType.resolveGeneric(0);
@@ -1219,6 +1245,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return matchingBeans;
 		}
 		else {
+			// fixme 不是可迭代属性回到上级方法处理
 			return null;
 		}
 	}

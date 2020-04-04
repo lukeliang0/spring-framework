@@ -74,6 +74,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 
 	@Override
 	protected Object instantiateWithMethodInjection(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
+		// fixme 如果有需要代理的动态方法
 		return instantiateWithMethodInjection(bd, beanName, owner, null);
 	}
 

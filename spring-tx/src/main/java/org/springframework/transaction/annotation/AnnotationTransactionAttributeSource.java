@@ -142,6 +142,8 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	@Override
 	@Nullable
 	protected TransactionAttribute findTransactionAttribute(Method method) {
+		// fixme unit 10.0.0.5
+		// fixme 处理注解事务属性
 		return determineTransactionAttribute(method);
 	}
 
@@ -157,6 +159,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 */
 	@Nullable
 	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement element) {
+		// fixme 类初始化时初始化了 SpringTransactionAnnotationParser并交由其转换
 		for (TransactionAnnotationParser annotationParser : this.annotationParsers) {
 			TransactionAttribute attr = annotationParser.parseTransactionAnnotation(element);
 			if (attr != null) {

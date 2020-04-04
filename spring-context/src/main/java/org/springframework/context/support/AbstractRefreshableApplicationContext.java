@@ -122,16 +122,25 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 */
 	@Override
 	protected final void refreshBeanFactory() throws BeansException {
+
+		// FIXME obtainBeanFactory委托至此
 		if (hasBeanFactory()) {
 			destroyBeans();
 			closeBeanFactory();
 		}
 		try {
+			// FIXME 创建DefaultListableBeanFactory
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
+			// FIXME 为序列化指定id，如有必要让这个BeanFactory从id反序列化到BeanFactory对象
 			beanFactory.setSerializationId(getId());
+			// FIXME 定制Beanfactory，设置相关属性，包括是否允许设置同名称的不同定义对象以及循环依赖
+			// FIXME 设置Autowired和Qualifier 解析器QualifierAnnotationAutowireCandidateResolver
 			customizeBeanFactory(beanFactory);
+
+			// FIXME 初始化DocumentReader并进行xml文件读取和解析
 			loadBeanDefinitions(beanFactory);
 			synchronized (this.beanFactoryMonitor) {
+				//FIXME highlight
 				this.beanFactory = beanFactory;
 			}
 		}
@@ -222,12 +231,19 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @see DefaultListableBeanFactory#setAllowEagerClassLoading
 	 */
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
+		// FIXME 如果属性 allowBeanDefinitionOverriding 不为空，设置beanfactory相应属性
+		// FIXME 含义： 是否允许覆盖同名称的不同定义对象
 		if (this.allowBeanDefinitionOverriding != null) {
 			beanFactory.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
 		}
+		// FIXME 如果allowCircularReferences 不为空，设置 beanfactory 的属性， 是否允许bean之间循环依赖
 		if (this.allowCircularReferences != null) {
 			beanFactory.setAllowCircularReferences(this.allowCircularReferences);
 		}
+
+		//FIXME 如上两个属性，该抽象类中并未设置，可以在扩展时设置
+
+		// TODO 书中用于Qualifier和@Autowired的代码没在这
 	}
 
 	/**

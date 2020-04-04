@@ -226,6 +226,7 @@ public abstract class AopUtils {
 			return false;
 		}
 
+
 		MethodMatcher methodMatcher = pc.getMethodMatcher();
 		if (methodMatcher == MethodMatcher.TRUE) {
 			// No need to iterate the methods if we're matching any method anyway...
@@ -248,6 +249,8 @@ public abstract class AopUtils {
 			for (Method method : methods) {
 				if (introductionAwareMethodMatcher != null ?
 						introductionAwareMethodMatcher.matches(method, targetClass, hasIntroductions) :
+						// fixme child-entry unit 10.0.0.3
+						// fixme impl with TransactionAttributeSourcePointcut
 						methodMatcher.matches(method, targetClass)) {
 					return true;
 				}

@@ -93,6 +93,7 @@ import org.springframework.util.ClassUtils;
  * @see ConfigurableBeanFactory#registerCustomEditor
  * @see org.springframework.validation.DataBinder#registerCustomEditor
  */
+// fixme 扩展点支持，设置 String -> 特殊值对象的转换
 public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered {
 
 	protected final Log logger = LogFactory.getLog(getClass());

@@ -46,3 +46,30 @@ and releases are announced via our [news feed](https://spring.io/blog/category/n
 
 The Spring Framework is released under version 2.0 of the
 [Apache License](https://www.apache.org/licenses/LICENSE-2.0).
+
+
+## Luke
+
+FIXME 源码注释
+fixme 我的注释
+TODO 和书中不同的地方
+tagnow 目前看到的地方
+hard 难点
+important 重点 
+questByLuke 疑问
+highlight 原书中的高亮代码
+扩展点实现 今后扩展可以用到的地方
+扩展点支持 spring对扩展点的调用位置
+
+扩展点实践 spring 自己使用扩展点的地方
+配置支持 spring 配置的支持
+
+entry 流程入口
+unit 单元序
+property 属性表
+
+nextLineIn 下一行点进去
+chain end nextLineIn的终点
+child-entry 子入口，通用功能处跳到扩展点
+
+扩展点工具 support之类的扩展接口工具类

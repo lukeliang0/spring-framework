@@ -333,6 +333,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 				if (encodedResource.getEncoding() != null) {
 					inputSource.setEncoding(encodedResource.getEncoding());
 				}
+
 				return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
 			}
 			finally {

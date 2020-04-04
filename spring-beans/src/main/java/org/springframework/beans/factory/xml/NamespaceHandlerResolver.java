@@ -28,6 +28,7 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.beans.factory.xml.DefaultBeanDefinitionDocumentReader
  */
 @FunctionalInterface
+/** fixme unit 3.1.1.14  扩展点实现 */
 public interface NamespaceHandlerResolver {
 
 	/**

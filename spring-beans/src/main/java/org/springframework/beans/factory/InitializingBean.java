@@ -33,6 +33,7 @@ package org.springframework.beans.factory;
  */
 public interface InitializingBean {
 
+	// fixme 扩展点实现，先于 init-method
 	/**
 	 * Invoked by the containing {@code BeanFactory} after it has set all bean properties
 	 * and satisfied {@link BeanFactoryAware}, {@code ApplicationContextAware} etc.

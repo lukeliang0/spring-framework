@@ -60,6 +60,8 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	@Override
 	public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
 		// Don't override the class with CGLIB if no overrides.
+		// FIXME 实例化对象
+		//FIXME 如果有需要覆盖或者动态替换的方法需要用cglib动态代理，将动态方法植入类中(else)，如果没有，直接反射
 		if (!bd.hasMethodOverrides()) {
 			Constructor<?> constructorToUse;
 			synchronized (bd.constructorArgumentLock) {
@@ -88,6 +90,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 		}
 		else {
 			// Must generate CGLIB subclass.
+			// fixme CglibSubclassingInstantiationStrategy.java
 			return instantiateWithMethodInjection(bd, beanName, owner);
 		}
 	}

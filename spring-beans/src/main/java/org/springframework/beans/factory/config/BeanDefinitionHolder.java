@@ -47,6 +47,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	private final String[] aliases;
 
 
+
 	/**
 	 * Create a new BeanDefinitionHolder.
 	 * @param beanDefinition the BeanDefinition to wrap

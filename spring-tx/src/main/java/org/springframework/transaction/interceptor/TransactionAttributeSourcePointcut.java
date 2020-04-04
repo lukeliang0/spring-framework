@@ -39,6 +39,8 @@ abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPoi
 			return false;
 		}
 		TransactionAttributeSource tas = getTransactionAttributeSource();
+		// fixme unit 10.0.0.3
+		// fixme entry
 		return (tas == null || tas.getTransactionAttribute(method, targetClass) != null);
 	}
 

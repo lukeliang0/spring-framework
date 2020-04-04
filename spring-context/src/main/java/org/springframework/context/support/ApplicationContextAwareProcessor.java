@@ -58,6 +58,7 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.context.ApplicationContextAware
  * @see org.springframework.context.support.AbstractApplicationContext#refresh()
  */
+//fixme ApplicationContext 添加入自有的 BeanFactory的BeanProcessor
 class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 	private final ConfigurableApplicationContext applicationContext;
@@ -77,6 +78,9 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	@Override
 	@Nullable
 	public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
+		// fixme applicationContext对BeanFactory的扩展, init-method前调用
+		// fixme 将bean aware的context/resource等 注入 bean
+		// fixme 随后需要忽略掉这些父子依赖
 		AccessControlContext acc = null;
 
 		if (System.getSecurityManager() != null &&

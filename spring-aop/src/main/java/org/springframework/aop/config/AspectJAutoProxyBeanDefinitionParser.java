@@ -41,7 +41,11 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 	@Override
 	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		//fixme 解析aop配置
+		// FIXME hignlight
+		//FIXME 注册 AnnotationAwareAspectJAutoProxyCreator
 		AopNamespaceUtils.registerAspectJAnnotationAutoProxyCreatorIfNecessary(parserContext, element);
+		// FIXME 注解中子类的处理
 		extendBeanDefinition(element, parserContext);
 		return null;
 	}

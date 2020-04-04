@@ -72,6 +72,8 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 */
 	@Nullable
 	default Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+		// fixme 扩展点实现 直接返回bean??
+		// fixme 修改beanDefinition?
 		return null;
 	}
 
@@ -91,6 +93,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @see #postProcessBeforeInstantiation
 	 */
 	default boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
+		// fixme 实现扩展点 是否继续进行属性填充
 		return true;
 	}
 
@@ -115,7 +118,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	@Nullable
 	default PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
-
+		// fixme 扩展点实现 属性获取完毕、填充前，对属性进行再处理
 		return pvs;
 	}
 

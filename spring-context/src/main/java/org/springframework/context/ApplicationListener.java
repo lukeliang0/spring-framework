@@ -40,6 +40,7 @@ public interface ApplicationListener<E extends ApplicationEvent> extends EventLi
 	 * Handle an application event.
 	 * @param event the event to respond to
 	 */
+	// fixme 扩展点实现
 	void onApplicationEvent(E event);
 
 }

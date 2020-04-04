@@ -66,6 +66,7 @@ public interface Ordered {
 	 * @see #HIGHEST_PRECEDENCE
 	 * @see #LOWEST_PRECEDENCE
 	 */
+	// fixme 扩展点支持
 	int getOrder();
 
 }

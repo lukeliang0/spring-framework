@@ -94,6 +94,8 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
 	protected Object getObjectFromFactoryBean(FactoryBean<?> factory, String beanName, boolean shouldPostProcess) {
+		//FIXME 实际处理factoryBean生成对象
+		//FIXME　单例模式判断
 		if (factory.isSingleton() && containsSingleton(beanName)) {
 			synchronized (getSingletonMutex()) {
 				Object object = this.factoryBeanObjectCache.get(beanName);
@@ -133,6 +135,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 		}
 		else {
 			Object object = doGetObjectFromFactoryBean(factory, beanName);
+			//FIXME postProcessor和书上不通，被提到了doGetObjectFromFactoryBean的外面
 			if (shouldPostProcess) {
 				try {
 					object = postProcessObjectFromFactoryBean(object, beanName);
@@ -156,6 +159,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	private Object doGetObjectFromFactoryBean(final FactoryBean<?> factory, final String beanName)
 			throws BeanCreationException {
 
+		//FIXME 最终根据factoryBeans生成bean的方法
 		Object object;
 		try {
 			if (System.getSecurityManager() != null) {
@@ -168,6 +172,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 				}
 			}
 			else {
+				// FIXME 生成对象方法调用
 				object = factory.getObject();
 			}
 		}
@@ -177,6 +182,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 		catch (Throwable ex) {
 			throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 		}
+		//TODO 和书上不同，方法签名里，去掉了shouldPostProcessor
 
 		// Do not accept a null value for a FactoryBean that's not fully
 		// initialized yet: Many FactoryBeans just return null then.

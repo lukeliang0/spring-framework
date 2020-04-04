@@ -111,33 +111,46 @@ class ConstructorResolver {
 	public BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd,
 			@Nullable Constructor<?>[] chosenCtors, @Nullable Object[] explicitArgs) {
 
+		// TODO HARD
+		//FIXME 构造函数注入
 		BeanWrapperImpl bw = new BeanWrapperImpl();
+		// fixme 属性编辑器被注入
 		this.beanFactory.initBeanWrapper(bw);
 
 		Constructor<?> constructorToUse = null;
 		ArgumentsHolder argsHolderToUse = null;
 		Object[] argsToUse = null;
 
+		// FIXME explicitArgs通过getBean方法传入
+		// FIXME 如果getBean指定方法参数则直接使用
 		if (explicitArgs != null) {
 			argsToUse = explicitArgs;
 		}
 		else {
+			// FIXME 如果没有指定，从配置文件解析
 			Object[] argsToResolve = null;
+			// FIXME 尝试从缓存获取
 			synchronized (mbd.constructorArgumentLock) {
 				constructorToUse = (Constructor<?>) mbd.resolvedConstructorOrFactoryMethod;
 				if (constructorToUse != null && mbd.constructorArgumentsResolved) {
 					// Found a cached constructor...
+					// FIXME 从缓存获取
 					argsToUse = mbd.resolvedConstructorArguments;
 					if (argsToUse == null) {
+						// FIXME 配置的构造函数参数
 						argsToResolve = mbd.preparedConstructorArguments;
 					}
 				}
 			}
+			// FIXME 如果缓存中存在
 			if (argsToResolve != null) {
+				// FIXME 解析参数类型，如给定方法的构造函数A(int,int)	，则通过此函数会把配置方法中的("1","1"）换成(1,1)
+				//FIXME 缓存中的值可能是原始也可能是最终值
 				argsToUse = resolvePreparedArguments(beanName, mbd, bw, constructorToUse, argsToResolve);
 			}
 		}
 
+		// FIXME 没有被缓存
 		if (constructorToUse == null) {
 			// Need to resolve the constructor.
 			boolean autowiring = (chosenCtors != null ||
@@ -146,11 +159,15 @@ class ConstructorResolver {
 
 			int minNrOfArgs;
 			if (explicitArgs != null) {
+				// FIXME 使用getBean传入
 				minNrOfArgs = explicitArgs.length;
 			}
 			else {
+				// FIXME  提取配置文件中传入
 				ConstructorArgumentValues cargs = mbd.getConstructorArgumentValues();
+				// FIXME 用于承载解析后的构造函数参数的值
 				resolvedValues = new ConstructorArgumentValues();
+				// FIXME 解析到的参数个数
 				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
 			}
 
@@ -168,6 +185,7 @@ class ConstructorResolver {
 							"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
 				}
 			}
+			// FIXME 排序给定的构造函数， public优先参数数量降序、非public构造函数参数数量降序
 			AutowireUtils.sortConstructors(candidates);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Set<Constructor<?>> ambiguousConstructors = null;
@@ -179,22 +197,33 @@ class ConstructorResolver {
 				if (constructorToUse != null && argsToUse.length > paramTypes.length) {
 					// Already found greedy constructor that can be satisfied ->
 					// do not look any further, there are only less greedy constructors left.
+					//FIXME 如果已经找到选用的构造函数 或者(??) 需要的参数个数小于当前的构造函数参数个数则终止
+					// FIXME 因为已经参数倒序排列
+					// fixme 可能是 and ，因为可能用重载的同参数顺序，看看下面会不会先把constructorToUse设置然后继续查找
+					// TODO 这里的“或者”是不是错的？ 因为是 && and，看看后面对constructor的操作
 					break;
 				}
 				if (paramTypes.length < minNrOfArgs) {
+					// FIXME 参数个数不相等
 					continue;
 				}
 
 				ArgumentsHolder argsHolder;
 				if (resolvedValues != null) {
+					// FIXME 有参数则根据值构造对应参数类型的参数
 					try {
+						// TODO　没了书上的 注解判断条件
+						// FIXME  注释上获取参数名称
 						String[] paramNames = ConstructorPropertiesChecker.evaluate(candidate, paramTypes.length);
 						if (paramNames == null) {
+							// FIXME 获取参数名称探测器
 							ParameterNameDiscoverer pnd = this.beanFactory.getParameterNameDiscoverer();
 							if (pnd != null) {
+								// FIXME 获取指定构造函数的参数名称
 								paramNames = pnd.getParameterNames(candidate);
 							}
 						}
+						// FIXME 根据参数名和参数类型创建参数持有者
 						argsHolder = createArgumentArray(beanName, mbd, resolvedValues, bw, paramTypes, paramNames,
 								getUserDeclaredConstructor(candidate), autowiring);
 					}
@@ -215,12 +244,16 @@ class ConstructorResolver {
 					if (paramTypes.length != explicitArgs.length) {
 						continue;
 					}
+					// FIXME 构造函数没有参数的情况
 					argsHolder = new ArgumentsHolder(explicitArgs);
 				}
 
+				// FIXME 检查是否有不确定性的构造函数存在，例如不同的构造函数的参数为父子关系
+				// TODO 这个weight，看起来像是容差，更低的容差会覆盖高容差的已选定构造函数 argsHolderToUse
 				int typeDiffWeight = (mbd.isLenientConstructorResolution() ?
 						argsHolder.getTypeDifferenceWeight(paramTypes) : argsHolder.getAssignabilityWeight(paramTypes));
 				// Choose this constructor if it represents the closest match.
+				// FIXME，如果容差更小则选定
 				if (typeDiffWeight < minTypeDiffWeight) {
 					constructorToUse = candidate;
 					argsHolderToUse = argsHolder;
@@ -228,6 +261,7 @@ class ConstructorResolver {
 					minTypeDiffWeight = typeDiffWeight;
 					ambiguousConstructors = null;
 				}
+				// TODO 容差相等？ 把两个构造函数放一起了？
 				else if (constructorToUse != null && typeDiffWeight == minTypeDiffWeight) {
 					if (ambiguousConstructors == null) {
 						ambiguousConstructors = new LinkedHashSet<>();
@@ -235,9 +269,11 @@ class ConstructorResolver {
 					}
 					ambiguousConstructors.add(candidate);
 				}
+				// fixme 构造函数遍历结束
 			}
 
 			if (constructorToUse == null) {
+				// fixme 没有合适的构造函数 报错
 				if (causes != null) {
 					UnsatisfiedDependencyException ex = causes.removeLast();
 					for (Exception cause : causes) {
@@ -250,6 +286,7 @@ class ConstructorResolver {
 						"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities)");
 			}
 			else if (ambiguousConstructors != null && !mbd.isLenientConstructorResolution()) {
+				// fixme 多个合适的构造函数 ，报错
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"Ambiguous constructor matches found in bean '" + beanName + "' " +
 						"(hint: specify index/type/name arguments for simple parameters to avoid type ambiguities): " +
@@ -257,6 +294,7 @@ class ConstructorResolver {
 			}
 
 			if (explicitArgs == null) {
+				// FIXME 将解析的构造函数加入缓存
 				argsHolderToUse.storeCache(mbd, constructorToUse);
 			}
 		}
@@ -276,6 +314,7 @@ class ConstructorResolver {
 				beanInstance = strategy.instantiate(mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 			}
 
+			//FIXME 将构建的实例加入beanwrapper
 			bw.setBeanInstance(beanInstance);
 			return bw;
 		}
